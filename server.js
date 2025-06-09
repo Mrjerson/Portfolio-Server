@@ -7,6 +7,8 @@ const projects = require("./routes/project");
 const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
+const { connectToServer } = require("./db/connection");
+
 dotenv.config();
 app.use(cors());
 
@@ -19,6 +21,13 @@ app.use("/certificates", certificates);
 
 app.use("/projects", projects);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+connectToServer()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to MongoDB:", err);
+    process.exit(1);
+  });
