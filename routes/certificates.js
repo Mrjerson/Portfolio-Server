@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db/connection");
+const { getDb } = require("../db/connection");
 
 router.get("/", async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM certificates");
-    res.json(results);
+    const db = getDb();
+    const certificates = await db.collection("certificates").find().toArray();
+    res.json(certificates);
   } catch (err) {
     console.error("Error fetching certificates:", err);
     res.status(500).json({ message: "Internal server error" });
