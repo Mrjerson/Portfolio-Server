@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db/connection");
+const { getDb } = require("../db/connection");
 
 router.get("/", async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM projects");
-    res.json(results);
+    const db = getDb();
+    const projects = await db.collection("projects").find().toArray();
+    res.json(projects);
   } catch (err) {
     console.error("Error fetching projects:", err);
     res.status(500).json({ message: "Internal server error" });
