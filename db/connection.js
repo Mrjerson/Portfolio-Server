@@ -1,16 +1,28 @@
-const mysql = require("mysql2");
+const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+const uri = process.env.DB_URI;
+
+const client = new MongoClient(uri, {
+  maxPoolSize: 10, 
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000, 
 });
 
-module.exports = pool.promise();
+let dbConnection;
+
+module.exports = {
+  connectToServer: async function () {
+    try {
+      dbConnection = await client.connect();
+      console.log("Successfully connected to MongoDB.");
+    } catch (err) {
+      console.error("MongoDB connection error:", err);
+      process.exit(1);
+    }
+  },
+  getDb: function () {
+    return dbConnection.db();
+  },
+};
